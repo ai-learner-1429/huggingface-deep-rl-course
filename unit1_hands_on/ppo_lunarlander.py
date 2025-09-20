@@ -12,6 +12,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.vec_env import SubprocVecEnv
 
 # %%
 # Test a random policy.
@@ -56,27 +57,34 @@ print("Action Space Sample", env.action_space.sample())  # Take a random action
 
 # %%
 # Create environment
-env = gym.make(env_id)
+# env = gym.make(env_id)
+n_envs = 16
+env = make_vec_env(env_id, n_envs=n_envs)
+# env = make_vec_env(env_id, n_envs=n_envs, vec_env_cls=SubprocVecEnv)
 
 # SOLUTION
 # We added some parameters to accelerate the training
 model = PPO(
     policy="MlpPolicy",
     env=env,
+    # Update params
     n_steps=1024,
     batch_size=64,
     n_epochs=4,
+    # PPO params
     gamma=0.999,
     gae_lambda=0.98,
     ent_coef=0.01,
+    # Other
     device="auto",
     verbose=1,
 )
 
 # SOLUTION
 # Train it for 1,000,000 timesteps
-# Training stats: fps=694, 1.47s per iteration (1024 steps), 1440s for 977 iterations or 1e6 steps.
-model.learn(total_timesteps=1000000)
+# v1 training stats: fps=694, 1.47s per iteration (1024 steps), 1440s for 977 iterations or 1e6 steps. Result: 250.22 +/- 32.58
+# v2, n_envs 1 -> 16, reduces runtime from 1440s to 588s, a 2.4x speedup. Result: 277.43 +/- 15.65
+model.learn(total_timesteps=int(1e6))
 
 # Save the model inzip a zip file.
 model_name = f"ppo-{env_id}"
