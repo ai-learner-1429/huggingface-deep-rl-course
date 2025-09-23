@@ -21,3 +21,11 @@ Run the training script (it took ~24min on a GPU):
 ```bash
 python unit1_hands_on/ppo_lunarlander.py
 ```
+
+## Bonus Unit1: Train Huggy
+First, one needs to follow the instructions [here](https://huggingface.co/learn/deep-rl-course/en/unitbonus1/train) to install `ml-agents` and the `Huggy` environment. Once the dependencies are installed, 
+go to `bonus_unit1_huggy`, and run
+```bash
+mlagents-learn ./Huggy.yaml --env=./trained-envs-executables/linux/Huggy/Huggy --run-id="Huggy" --no-graphics
+```
+It takes 32min to train, and GPU utilization seems quite low.
