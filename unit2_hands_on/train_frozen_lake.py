@@ -35,12 +35,7 @@ print("Action Space Sample", env.action_space.sample())  # Take a random action
 state_space = env.observation_space.n
 action_space = env.action_space.n
 
-
-def initialize_q_table(state_space: int, action_space: int):
-    q_table = np.zeros((state_space, action_space))
-    return q_table
-
-
+from unit2_hands_on.utils import initialize_q_table
 q_table_frozenlake = initialize_q_table(state_space, action_space)
 
 # %%
