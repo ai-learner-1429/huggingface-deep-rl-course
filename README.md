@@ -13,12 +13,12 @@ uv init --python=python3.11
 source .venv/bin/activate   # Linux/macOS
 # or
 .venv\Scripts\activate      # Windows
-pip install -r unit1_hands_on/requirements.txt
 ```
 
 ## Unit1: Hands-on PPO
 Run the training script (it took ~24min on a GPU):
 ```bash
+uv pip install -r unit1_hands_on/requirements-unit1.txt
 python unit1_hands_on/ppo_lunarlander.py
 ```
 
@@ -29,3 +29,9 @@ go to `bonus_unit1_huggy`, and run
 mlagents-learn ./Huggy.yaml --env=./trained-envs-executables/linux/Huggy/Huggy --run-id="Huggy" --no-graphics
 ```
 It takes 32min to train, and GPU utilization seems quite low.
+
+## Uni2: Hands-on Q-learning
+```bash
+uv pip install -r unit2_hands_on/requirements-unit2.txt
+python unit1_hands_on/q_learning.py
+```
