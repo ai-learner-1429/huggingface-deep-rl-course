@@ -1,14 +1,7 @@
 # %%
-import numpy as np
 import gymnasium as gym
-# import random
-# import imageio
-# import os
-# import tqdm
 
-# import pickle
-from tqdm import tqdm
-
+import pickle
 from unit2_hands_on.utils import initialize_q_table, train
 
 # %%
@@ -24,8 +17,12 @@ print("Q-table shape: ", q_table_taxi.shape)
 
 # %%
 # Training parameters
+# v1: mean_reward=7.56, std_reward=2.71
 n_training_episodes = 25000  # Total training episodes
 learning_rate = 0.7  # Learning rate
+# # v2: same Q-table as v1, therefore same performance.
+# n_training_episodes = 1_000_000
+# learning_rate = 0.2
 
 # Evaluation parameters
 n_eval_episodes = 100  # Total number of test episodes
@@ -138,7 +135,7 @@ eval_seed = [
 # Environment parameters
 env_id = "Taxi-v3"  # Name of the environment
 max_steps = 99  # Max steps per episode
-gamma = 0.95  # Discounting rate
+gamma = 0.99  # Discounting rate
 
 # Exploration parameters
 max_epsilon = 1.0  # Exploration probability at start
@@ -183,3 +180,36 @@ repo_name = "q-Taxi-v3"
 
 from unit2_hands_on.utils import push_to_hub
 push_to_hub(repo_id=f"{username}/{repo_name}", model=model, env=env)
+
+# %%
+# Download the model
+# from urllib.error import HTTPError
+
+from huggingface_hub import hf_hub_download
+
+
+def load_from_hub(repo_id: str, filename: str) -> str:
+    """
+    Download a model from Hugging Face Hub.
+    :param repo_id: id of the model repository from the Hugging Face Hub
+    :param filename: name of the model zip file from the repository
+    """
+    # Get the model from the Hub, download and cache the model on your local disk
+    pickle_model = hf_hub_download(repo_id=repo_id, filename=filename)
+
+    with open(pickle_model, "rb") as f:
+        downloaded_model_file = pickle.load(f)
+
+    return downloaded_model_file
+
+model = load_from_hub(repo_id="ThomasSimonini/q-Taxi-v3", filename="q-learning.pkl")  # Try to use another model
+
+print(model)
+
+# %%
+# Evaluate the downloaded model
+env = gym.make(model["env_id"])
+
+from unit2_hands_on.utils import evaluate_agent
+mean_reward, std_reward = evaluate_agent(env, model["max_steps"], model["n_eval_episodes"], model["qtable"], model["eval_seed"])
+print(f"Mean_reward={mean_reward:.2f} +/- {std_reward:.2f}")

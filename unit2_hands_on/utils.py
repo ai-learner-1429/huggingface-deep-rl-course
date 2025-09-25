@@ -5,6 +5,7 @@ import imageio
 import json
 import numpy as np
 import pickle
+import time
 import random
 
 from huggingface_hub import HfApi, snapshot_download
@@ -33,7 +34,7 @@ def epsilon_greedy_policy(q_table, state, epsilon) -> int:
     return action
 
 
-def evaluate_agent(env, max_steps, n_eval_episodes, Q, seed):
+def evaluate_agent(env, max_steps, n_eval_episodes, Q, seed) -> tuple[float, float]:
     """
     Evaluate the agent for ``n_eval_episodes`` episodes and returns average reward and std of reward.
     :param env: The evaluation environment
@@ -84,6 +85,7 @@ def train(
     gamma,
     learning_rate,
 ):
+    start_time = time.time()
     for episode in range(n_training_episodes):
         eps = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay_rate * episode)
         obs, _ = env.reset()
@@ -96,6 +98,9 @@ def train(
             td_target = reward + gamma * np.max(q_table[new_obs])
             q_table[obs, action] += learning_rate * (td_target - q_table[obs, action])
             obs = new_obs
+        if episode % (n_training_episodes // 10) == 0:
+            cur_time = time.time()
+            print(f"Training progress: {episode}/{n_training_episodes} (time elapsed: {cur_time - start_time:.0f}s)")
 
     return q_table
 
