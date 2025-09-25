@@ -33,5 +33,6 @@ It takes 32min to train, and GPU utilization seems quite low.
 ## Uni2: Hands-on Q-learning
 ```bash
 uv pip install -r unit2_hands_on/requirements-unit2.txt
-python unit1_hands_on/q_learning.py
+python unit2_hands_on/train_frozen_lake.py
+python unit2_hands_on/train_taxi.py
 ```
