@@ -61,3 +61,9 @@ chmod -R 755 ./training-envs-executables/linux/SnowballTarget
 mlagents-learn ./SnowballTarget.yaml --env=./training-envs-executables/linux/SnowballTarget/SnowballTarget --run-id="SnowballTarget1" --no-graphics
 mlagents-push-to-hf  --run-id=SnowballTarget1 --local-dir=./results/SnowballTarget1  --repo-id="user05181824/ppo-SnowballTarget" --commit-message="Train a Snowball agent with PPO"
 ```
+
+## Unit6: A2C
+```bash
+uv pip install -r unit6_hands_on/requirements-unit6.txt
+python unit6_hands_on/a2c_panda_reach.py
+```

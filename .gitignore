@@ -5,3 +5,6 @@ trained-envs-executables
 training-envs-executables
 unit3_hands_on/hub
 unit3_hands_on/logs
+
+*.zip
+*.pkl
