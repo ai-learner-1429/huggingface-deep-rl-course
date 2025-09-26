@@ -42,3 +42,9 @@ python unit2_hands_on/train_taxi.py
 uv pip install -r unit3_hands_on/requirements-unit3.txt
 python -m rl_zoo3.train --algo dqn --env SpaceInvadersNoFrameskip-v4 -f logs/ -c unit3_hands_on/dqn.yml
 ```
+
+## Unit4: Policy Gradient
+```bash
+uv pip install -r unit4_hands_on/requirements-unit4.txt
+python unit4_hands_on/policy_gradient_cartpole.py
+```
