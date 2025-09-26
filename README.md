@@ -48,3 +48,16 @@ python -m rl_zoo3.train --algo dqn --env SpaceInvadersNoFrameskip-v4 -f logs/ -c
 uv pip install -r unit4_hands_on/requirements-unit4.txt
 python unit4_hands_on/policy_gradient_cartpole.py
 ```
+
+## Unit5: ML-agents
+```bash
+# Setup
+mkdir -p unit5_hands_on/training-envs-executables/linux
+cd unit5_hands_on
+wget "https://github.com/huggingface/Snowball-Target/raw/main/SnowballTarget.zip" -O ./training-envs-executables/linux/SnowballTarget.zip
+unzip -d ./training-envs-executables/linux/ ./training-envs-executables/linux/SnowballTarget.zip
+chmod -R 755 ./training-envs-executables/linux/SnowballTarget
+# Training
+mlagents-learn ./SnowballTarget.yaml --env=./training-envs-executables/linux/SnowballTarget/SnowballTarget --run-id="SnowballTarget1" --no-graphics
+mlagents-push-to-hf  --run-id=SnowballTarget1 --local-dir=./results/SnowballTarget1  --repo-id="user05181824/ppo-SnowballTarget" --commit-message="Train a Snowball agent with PPO"
+```
