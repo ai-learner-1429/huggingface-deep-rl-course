@@ -36,3 +36,9 @@ uv pip install -r unit2_hands_on/requirements-unit2.txt
 python unit2_hands_on/train_frozen_lake.py
 python unit2_hands_on/train_taxi.py
 ```
+
+## Unit3: DQN
+```bash
+uv pip install -r unit3_hands_on/requirements-unit3.txt
+python -m rl_zoo3.train --algo dqn --env SpaceInvadersNoFrameskip-v4 -f logs/ -c unit3_hands_on/dqn.yml
+```

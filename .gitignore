@@ -1,4 +1,6 @@
 __pycache__
 *.egg-info
-bonus_unit1_huggy/results/
-bonus_unit1_huggy/trained-envs-executables/
+bonus_unit1_huggy/results
+bonus_unit1_huggy/trained-envs-executables
+unit3_hands_on/hub
+unit3_hands_on/logs
