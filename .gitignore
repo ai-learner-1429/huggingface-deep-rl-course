@@ -1,10 +1,14 @@
 __pycache__
 *.egg-info
+# Logging and output
 results
 trained-envs-executables
 training-envs-executables
-unit3_hands_on/hub
-unit3_hands_on/logs
-
+hub
+logs
+runs
+# Output
 *.zip
 *.pkl
+# Other
+.vscode

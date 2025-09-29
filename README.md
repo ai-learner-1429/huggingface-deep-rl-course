@@ -67,3 +67,12 @@ mlagents-push-to-hf  --run-id=SnowballTarget1 --local-dir=./results/SnowballTarg
 uv pip install -r unit6_hands_on/requirements-unit6.txt
 python unit6_hands_on/a2c_panda_reach.py
 ```
+
+## Unit8-part1: PPO
+```bash
+uv pip install -r unit8_part1/requirements-unit8.txt
+python unit8_part1/ppo.py --env-id="LunarLander-v3" --repo-id="user05181824/ppo-LunarLander-v3" --total-timesteps=500000
+```
+
+The above command takes ~4min to train the PPO agent on LunarLander-v3. Once training is done, one may use `tensorboard` to visualize the results.
+![Training plot](assets/unit8_part1_ppo_lunar_lander_v3_result.png)
