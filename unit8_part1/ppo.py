@@ -484,6 +484,7 @@ if __name__ == "__main__":
                 writer.add_scalar("charts/episodic_return", info["episode"]["r"][idx], global_step)
                 writer.add_scalar("charts/episodic_length", info["episode"]["l"][idx], global_step)
                 # # TODO: why do we break the loop here? In theory, vectorized env should be able to auto-reset?
+                # # Besides, clearrl's ppo.py also doesn't have this "break" logic.
                 # break
 
         # bootstrap value if not done
@@ -499,10 +500,12 @@ if __name__ == "__main__":
                     else:
                         nextnonterminal = 1.0 - dones[t + 1]
                         nextvalues = values[t + 1]
+                    # TD residual at step=t
                     delta = rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
                     advantages[t] = lastgaelam = delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
                 returns = advantages + values
             else:
+                # No GAE, use rewards_to_go (aka returns) minus V as advantages.
                 returns = torch.zeros_like(rewards).to(device)
                 for t in reversed(range(args.num_steps)):
                     if t == args.num_steps - 1:
@@ -515,12 +518,12 @@ if __name__ == "__main__":
                 advantages = returns - values
 
         # flatten the batch
-        b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
-        b_logprobs = logprobs.reshape(-1)
-        b_actions = actions.reshape((-1,) + envs.single_action_space.shape)
-        b_advantages = advantages.reshape(-1)
-        b_returns = returns.reshape(-1)
-        b_values = values.reshape(-1)
+        b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)  # (n_envs * n_steps, obs_dim)
+        b_logprobs = logprobs.reshape(-1)  # (n_envs * n_steps,)
+        b_actions = actions.reshape((-1,) + envs.single_action_space.shape)  # (n_envs * n_steps, act_dim)
+        b_advantages = advantages.reshape(-1)  # (n_envs * n_steps, act_dim)
+        b_returns = returns.reshape(-1)  # (n_envs * n_steps, act_dim)
+        b_values = values.reshape(-1)  # (n_envs * n_steps, act_dim)
 
         # Optimizing the policy and value network
         b_inds = np.arange(args.batch_size)
@@ -529,20 +532,28 @@ if __name__ == "__main__":
             np.random.shuffle(b_inds)
             for start in range(0, args.batch_size, args.minibatch_size):
                 end = start + args.minibatch_size
-                mb_inds = b_inds[start:end]
+                mb_inds = b_inds[start:end]  # indices of the minibatch
 
                 _, newlogprob, entropy, newvalue = agent.get_action_and_value(
                     b_obs[mb_inds], b_actions.long()[mb_inds]
                 )
                 logratio = newlogprob - b_logprobs[mb_inds]
+                # ratio should be 1 at the first update as the policy hasn't changed yet.
                 ratio = logratio.exp()
 
+                # Note that old_approx_kl and approx_kl are only used for monitoring purposes.
                 with torch.no_grad():
                     # calculate approx_kl http://joschu.net/blog/kl-approx.html
+                    # old_approx_kl: first-order approximation of the KL divergence (unbiased), but it 
+                    # can be negative while the true KL divergence is always positive, and it has high
+                    # variance.
                     old_approx_kl = (-logratio).mean()
+                    # approx_kl: f-divergence with f(x)=x-1-log(x). The choice of f is to make it (1) non-negative, 
+                    # and (2) unbiased as E_q(p/q-1)=0.
                     approx_kl = ((ratio - 1) - logratio).mean()
                     clipfracs += [((ratio - 1.0).abs() > args.clip_coef).float().mean().item()]
 
+                # Normalize advantages within the minibatch
                 mb_advantages = b_advantages[mb_inds]
                 if args.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)
@@ -574,11 +585,12 @@ if __name__ == "__main__":
                 loss.backward()
                 nn.utils.clip_grad_norm_(agent.parameters(), args.max_grad_norm)
                 optimizer.step()
+            # End one epoch of training
 
             if args.target_kl is not None:
                 if approx_kl > args.target_kl:
                     break
-        # end for-epoch loop
+        # End for-epoch loop
 
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)
