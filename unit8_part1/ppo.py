@@ -472,6 +472,7 @@ if __name__ == "__main__":
             logprobs[step] = logprob
 
             # TRY NOT TO MODIFY: execute the game and log data.
+            # Note that here we move "action" from device to cpu, which creates overhead.
             next_obs, reward, terminated, truncated, info = envs.step(action.cpu().numpy())
             rewards[step] = torch.tensor(reward).to(device).view(-1)
             done = np.logical_or(terminated, truncated)  # (num_envs,)
