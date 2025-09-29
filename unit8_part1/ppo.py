@@ -450,6 +450,7 @@ if __name__ == "__main__":
     next_obs = torch.Tensor(init_obs).to(device)
     next_done = torch.zeros(args.num_envs).to(device)
     num_updates = args.total_timesteps // args.batch_size
+    print(f"The policy/value networks will be updated {num_updates} times (total_timesteps={args.total_timesteps}, num_envs={args.num_envs}, num_steps={args.num_steps})")
 
     for update in range(1, num_updates + 1):
         # Annealing the rate linearly if instructed to do so.
@@ -577,6 +578,7 @@ if __name__ == "__main__":
             if args.target_kl is not None:
                 if approx_kl > args.target_kl:
                     break
+        # end for-epoch loop
 
         y_pred, y_true = b_values.cpu().numpy(), b_returns.cpu().numpy()
         var_y = np.var(y_true)
@@ -591,8 +593,9 @@ if __name__ == "__main__":
         writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
         writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
         writer.add_scalar("losses/explained_variance", explained_var, global_step)
-        print("SPS/steps_per_second:", int(global_step / (time.time() - start_time)))
+        print(f"Update={update}, SPS/steps_per_second:", int(global_step / (time.time() - start_time)))
         writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
+    # end "for update" loop
 
     envs.close()
     writer.close()
